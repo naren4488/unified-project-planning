@@ -37,7 +37,6 @@ Failure → Show error message
 User lands on Dashboard → See sidebar navigation:
 ├── Home: Welcome message, basic info
 ├── Launchpad: Grid of available applications
-├── Notifications: System messages and updates
 └── Profile: User settings and account management
 ```
 
@@ -52,24 +51,28 @@ User visits Launchpad → See app cards with different states:
 #### **4. Admin Workflow**
 ```
 Admin needs to grant access → 
-├── Create user accounts (no self-registration)
-├── Assign application permissions
-├── Share login credentials with users
-└── Manage access requests from users
+├── Create user accounts via backend APIs (no self-registration)
+├── Assign application permissions via backend systems
+├── Share login credentials with users directly
+└── Manage access requests via backend admin tools
 ```
+**Note**: No admin UI screens required - all admin functionality handled by backend team
 
 ### **Key Business Rules**
-1. **No Self-Registration**: All user accounts are created by admins
-2. **Admin-Controlled Access**: Users cannot gain access to applications without admin approval
+1. **No Self-Registration**: All user accounts are created by admins via backend APIs
+2. **Admin-Controlled Access**: Users cannot gain access to applications without admin approval (handled via backend)
 3. **Clear Permission Visibility**: Users always know their access status for each application
-4. **Request-Based Access**: Users can request access, but admins must approve
+4. **Request-Based Access**: Users can request access, but admins must approve via backend systems
 5. **Unified Authentication**: Single login provides access to the platform (individual apps may have their own auth)
+6. **No Admin UI Required**: Admin functionality handled by backend team through APIs manually
 
 ### **Success Metrics**
 - **User Adoption**: How many users actively use the platform
 - **Access Request Volume**: Number of access requests processed
 - **Time to Access**: How quickly users can get access to needed applications
 - **User Satisfaction**: Feedback on the unified experience
+- **Technical Performance**: Fast loading, intuitive navigation, robust security
+- **Code Quality**: Clean architecture, maintainable code structure
 
 ---
 
@@ -96,7 +99,6 @@ Admin needs to grant access →
 #### Dashboard Routes
 - `/` - Home page
 - `/apps` - Launchpad (application grid)
-- `/notifications` - System notifications
 - `/profile` - User profile management
 
 ### State Management Strategy
@@ -104,7 +106,6 @@ Admin needs to grant access →
 #### Phase 1: React Context
 - AuthContext (user state, login/logout)
 - AppContext (apps data, access permissions)
-- NotificationContext (notifications state)
 
 #### Phase 2: Redux Toolkit
 - Global state management
@@ -115,50 +116,126 @@ Admin needs to grant access →
 
 ### Authentication System
 - ✅ **Sign-in only** (no public registration)
-- ✅ **Admin-controlled accounts** (credentials shared directly by admin)
+- ✅ **Admin-controlled accounts** (credentials shared directly by admin via backend)
 - ✅ **Dual authentication methods**: Username/Password + Microsoft OAuth
 - ✅ **Password recovery** for email-based accounts
 - ✅ **Graceful error handling** for unauthorized access attempts
+- ✅ **No admin UI required** (admin functionality handled by backend team)
+
+### Authentication Flow Details (From Figma Designs)
+
+#### Login Page (`/auth/login`)
+- **Layout**: Split design with form (60%) and lifestyle image (40%)
+- **Form Elements**:
+  - Purple circular logo with white 'V' and dotted arc
+  - "Welcome back" heading with "Please login to continue" subtitle
+  - Email input with placeholder "Enter your email"
+  - Password input with placeholder "Enter your Password"
+  - "Forgot Password?" link (right-aligned)
+  - Purple "Sign In" button
+  - "or" separator line
+  - White "Sign in with Microsoft" button with Microsoft logo
+
+#### Forgot Password Flow
+- **Trigger**: "Forgot Password?" link on login page
+- **Modal Dialog**: "Password reset" overlay with:
+  - Close (X) button in top-right
+  - Success message: "We have sent an email with a password reset link to your registered email address. If you haven't received the email, be sure to check your spam folder."
+  - "Back to login" link with left arrow
+
+#### Password Reset Page (`/auth/reset-password`)
+- **Layout**: Centered white card on gradient background
+- **Form Elements**:
+  - Purple logo with dotted arc
+  - "Choose a new password" title
+  - Password input with eye icon for visibility toggle
+  - Confirm Password input with eye icon
+  - Password strength indicator (visual bar with color coding)
+  - Requirements checklist with purple checkmarks:
+    - Minimum 8 characters
+    - One uppercase and one lowercase
+    - One number
+    - One special character
+    - Confirm new password matches
+  - Submit button (purple when enabled, grey when disabled)
+  - "Go to login" link
+
+#### Password Reset Success
+- **Success Dialog**: Centered modal with:
+  - Green circular checkmark icon
+  - "Password reset successful!" message
+  - Purple "Login" button
 
 ### Dashboard Navigation
 ```
 Sidebar Navigation:
 ├── 🏠 Home (/)
 ├── 📱 Launchpad (/apps)
-├── 🔔 Notifications (/notifications)
 └── 👤 Profile (/profile)
 ```
 
 ### Page Specifications
 
-#### Home Page
-- Simple welcome message
-- Placeholder for future content (announcements, user details)
-- Clean, minimal design
+#### Home Page ✅ **COMPLETED**
+- **Personalized Welcome**: "Good morning, Jason 👋" in pinkish-purple
+- **Main Value Proposition**: "Your unified space to plan, target, and optimize campaigns"
+- **Call-to-Action**: "Explore our apps →" button with gradient styling
+- **Feature Cards**: Three horizontal cards highlighting key capabilities:
+  - **Review Geo Performance**: Globe icon, geo-targeting insights
+  - **Top Audience Segments**: Target icon, audience analysis
+  - **Setup a new Campaign**: Puzzle piece icon, campaign creation
+- **Clean Design**: White background with subtle purple gradient
 
-#### Launchpad Page (`/apps`)
-- **Grid layout** of available applications
-- **Access control indicators**:
-  - ✅ Has access → Action button with arrow
-  - 🚫 No access → "Request Access" button with padlock icon
-- **Request Access Flow**:
-  - Dialog modal confirmation
-  - Send request to backend via API
-  - Show toast notification with response
-- **Support scenarios**: All access, partial access, no access
-- **UI States**: Loading skeletons, error states, empty states
+#### Launchpad Page (`/apps`) ✅ **COMPLETED**
+- **Header**: "viamedia Launchpad" with dotted arc branding
+- **Application Cards**: Three main applications in horizontal layout:
+  - **Omnichannel Planning**:
+    - Purple globe icon with network lines
+    - Description: "Recommends the optimal budget, channel mix, and projected outcomes to help marketers maximize efficiency and impact."
+    - Access: "Request access" button with padlock icon
+    - Status: "Your account doesn't have permission to access this application"
+  - **LFID Geo Graph Targeting**:
+    - Yellow diamond icon with black outline and arrow
+    - Description: "An AI-powered geo-targeting tool that maps audience clusters and helps you focus spend where campaigns perform best."
+    - Access: "Target audiences →" button with gradient
+  - **Attention+**:
+    - Blue circular icon with white 'C' shape
+    - Description: "A creative builder tool that enables you to design, customize, and manage ad creatives seamlessly across channels, ensuring consistency and impact."
+    - Access: "Create engaging ads →" button with gradient
+- **Useful Tips Section**:
+  - Lightbulb icon with "Useful tips for you" title
+  - Three optimization tips for campaign management
+- **Request Access Modal**:
+  - Title: "Request access"
+  - Message: "We have sent your request to administrator. You will be notified via email once your request is approved."
+  - Close button and overlay styling
 
-#### Notifications Page (`/notifications`)
-- System and app-level notifications
-- **Features**: Read/unread indicators, timestamps, action links, mark as read
-- **Status**: Design pending
 
-#### Profile Page (`/profile`)
-- User information display
-- Password management (email users only)
-- Microsoft account info (read-only)
-- Sign-out functionality
-- **Status**: Design pending
+#### Profile Page (`/profile`) ✅ **COMPLETED**
+- **Page Title**: "My Account" in large bold text
+- **Tab Navigation**: 
+  - "Account info" tab (active with purple underline)
+  - "Change password" tab (inactive)
+- **Account Info Tab**:
+  - User Profile Summary with circular profile picture and hover menu
+  - Name display: "John Mathews" in bold text
+  - Email display: "johnmathews@gmail.com" in smaller text
+  - Purple "Edit" button with pencil icon for profile editing
+  - Two-column layout with editable form fields
+  - Fields: First name, Last name, Email, Mobile number (with country code), Gender (dropdown), Time zone (dropdown)
+  - Action buttons: Purple "Save" and grey "Cancel"
+- **Change Password Tab**:
+  - Current Password field with eye icon for visibility toggle
+  - New Password field with placeholder "Enter new password"
+  - Confirm New Password field with placeholder "Re-enter new password"
+  - Password strength indicator with visual bar (Weak/Strong)
+  - Password requirements checklist with purple checkmarks
+  - Submit button (purple when enabled, grey when disabled)
+  - Error handling: "Invalid password!" message for current password
+- **Password Change Success Modal**:
+  - Green checkmark icon with "Password reset successful!" message
+  - Purple "Go to profile" button
+- **User Dropdown Menu**: Profile picture in sidebar shows "My Account" and "Logout" options
 
 ## 🎨 Design System & UI Strategy
 
@@ -195,39 +272,30 @@ Tailwind CSS (Base)
 - **Clear Indicators**: Visual feedback for access status
 - **Consistent Behavior**: Unified access control across all apps
 
-## 📊 Success Metrics
-
-- **User Experience**: Fast loading, intuitive navigation
-- **Security**: Robust authentication, proper access control
-- **Maintainability**: Clean code structure, scalable architecture
-- **Performance**: Optimized bundle size, efficient rendering
 
 ## 🎨 Design Reference Analysis
 
 ### Current Design Observations (from shared references)
 
-#### Login Page Design
-- **Split layout**: Login form (60%) + lifestyle image (40%)
-- **Brand elements**: Circular purple logo with white 'V', dotted arc
-- **Typography hierarchy**: "Welcome back" (large bold), "Please login to continue" (smaller)
-- **Form styling**: Rounded white inputs, purple accent color
-- **Authentication options**: Email/password + Microsoft OAuth button
-- **UX elements**: "Forgot Password?" link, clean separator with "or"
+#### Login Page Design ✅ **COMPLETED**
+- **Layout**: Split design with form (60%) and lifestyle image (40%)
+- **Brand Elements**: Purple circular logo with white 'V' and dotted arc
+- **Typography**: "Welcome back" heading with "Please login to continue" subtitle
+- **Form Fields**: Email and Password inputs with placeholders
+- **Authentication**: Email/password + Microsoft OAuth with logo
+- **UX Elements**: "Forgot Password?" link, "or" separator
 
-#### Dashboard/Home Page Design
-- **Sidebar navigation**: Dark purple background, white icons
-- **Personalized greeting**: "Good morning, Jason 👋" in pinkish-purple
-- **AI assistant integration**: Central input field with attachment/microphone icons
-- **Insight cards**: Purple star icons, data-driven recommendations
-- **Feature cards**: Three-column grid with icons, descriptions, and action buttons
+#### Dashboard/Home Page Design ✅ **COMPLETED**
+- **Layout**: Purple sidebar (left) + white main content area
+- **Sidebar**: Logo, Home/Apps navigation, user profile with dropdown menu
+- **Main Content**: Personalized greeting, value proposition, CTA button
+- **Feature Cards**: Three horizontal cards (Geo Performance, Audience Segments, Campaign Setup)
 
-#### Apps Page Design
-- **"viamedia Launchpad" branding**: Consistent with login page
-- **Access control UI**: Clear "Request access" vs action buttons with arrows
-- **Permission messaging**: "Your account doesn't have permission to access this application"
-- **App card structure**: Icon, title, description, action button, status message
-- **Recommendation system**: "Recommended for you" with personalized suggestions
-- **Tips section**: Bulleted advice with lightbulb icon
+#### Apps Page Design ✅ **COMPLETED**
+- **Layout**: Purple sidebar + white main content with "viamedia Launchpad" header
+- **Application Cards**: Three apps (Omnichannel Planning, LFID Geo Graph Targeting, Attention+)
+- **Access Control**: Request access buttons with permission status messages
+- **Useful Tips**: Lightbulb section with campaign optimization advice
 
 ### Design System Insights
 
@@ -247,28 +315,37 @@ Tailwind CSS (Base)
 - **Sidebar width**: Narrow, fixed width with dark background
 - **Main content**: Wide, light background with generous padding
 - **Grid systems**: Three-column layouts for feature/app cards
-- **Responsive considerations**: Split layouts for larger screens
+- **Screen support**: Large screen only (desktop/laptop)
 
 ## ✅ Clarified Requirements (From Team Discussion)
 
 ### **Confirmed Features for Initial Phase**
 - ✅ **Authentication**: Username/password + Microsoft OAuth only
-- ✅ **Admin-controlled access**: No signup, credentials shared by admin
+- ✅ **Admin-controlled access**: No signup, credentials shared by admin via backend
 - ✅ **Request Access Flow**: Dialog modal → API call → Toast notification
-- ✅ **Basic Navigation**: Home, Launchpad, Notifications, Profile
+- ✅ **Basic Navigation**: Home, Launchpad, Profile
 - ✅ **Launchpad**: App cards with access control and request flow
+- ✅ **No Admin UI**: Admin functionality handled by backend team through APIs
 
-### **Features Removed from Initial Phase**
-- ❌ **Chat functionality**: All chat-related features deferred
-- ❌ **AI Assistant**: AI insights, suggestions, and assistant features deferred
-- ❌ **Useful Tips**: AI-generated tips on launchpad deferred
-- ❌ **Signup Screen**: Not needed (admin-controlled only)
 
 ### **Key Implementation Details**
 - **Request Access**: Modal dialog → Backend API → Toast notification
 - **Route Structure**: Clear paths defined for all main pages
 - **Authentication Flow**: Separate routes for different login methods
 - **Access Control**: Clear visual distinction between accessible and restricted apps
+- **App Launch**: Opens in new tab with authentication tokens passed
+- **Screen Support**: Large screen only (no responsive/mobile design required)
+
+### **Available Applications**
+1. **Omnichannel Planning** - Budget optimization tool (requires admin approval)
+2. **LFID Geo Graph Targeting** - AI-powered geo-targeting (available to user)
+3. **Attention+** - Creative builder and ad management (available to user)
+
+### **Profile & Account Management** ✅ **COMPLETED**
+- **Account Info Tab**: User profile summary, editable form fields, save/cancel actions
+- **Change Password Tab**: Current/new/confirm password fields, strength indicator, requirements checklist
+- **User Dropdown**: Profile picture menu with "My Account" and "Logout" options
+- **Success Modals**: Password change confirmation with "Go to profile" action
 
 ## 🚀 Implementation Phases
 
@@ -280,7 +357,6 @@ Tailwind CSS (Base)
 
 ### Phase 2: Core Features
 - [ ] Apps page with access control
-- [ ] Notifications system
 - [ ] Profile management
 - [ ] Error handling and loading states
 
@@ -302,173 +378,37 @@ Tailwind CSS (Base)
 
 ### 🎨 **Pending UI/UX Designs**
 
-#### High Priority (Blocking Development)
-1. **Forgot Password Page Design**
-   - Form layout and styling
-   - Success/error state designs
-   - Email confirmation flow
-
-2. **Profile Page Design**
-   - User information layout
-   - Password change form
-   - Microsoft account info display
-   - Settings organization
-
-3. **Notifications Page Design**
-   - List layout and styling
-   - Read/unread indicators
-   - Notification types and icons
-   - Action buttons and interactions
-
-4. **Request Access Modal Design**
-   - Modal layout and styling
-   - Confirmation message
-   - Loading states
-   - Success/error feedback
-
 #### Medium Priority (Can Start with Placeholders)
-5. **Toast Notification Design**
-   - Success, error, warning, info variants
-   - Animation and positioning
-   - Auto-dismiss behavior
+1. **Loading States** - Skeleton loaders, page indicators, button states
+2. **Error States** - 404/500 pages, form validation, empty states
 
-6. **Loading States Design**
-   - Skeleton loaders for app cards
-   - Page loading indicators
-   - Button loading states
-
-7. **Error States Design**
-   - 404, 500, network error pages
-   - Form validation error styling
-   - Empty state illustrations
-
-### 🔧 **Technical Questions for Team Discussion**
+### 🔧 **Key Technical Questions**
 
 #### Backend Integration
-1. **API Endpoints & Authentication**
-   - What are the exact API endpoints for user authentication?
-   - How are JWT tokens managed and refreshed?
-   - What's the API base URL and environment setup?
-   - How are Microsoft OAuth tokens handled?
-
-2. **Request Access API**
-   - What's the endpoint for submitting access requests?
-   - What data needs to be sent (user ID, app ID, reason)?
-   - What response format should we expect?
-   - How are request statuses tracked?
-
-3. **App Data Management**
-   - How is the list of available apps fetched?
-   - What's the data structure for app information?
-   - How are user permissions checked for each app?
-   - Are there different app categories or types?
-
-#### App Navigation & Integration
-4. **Application Launch Flow**
-   - When users click "Open App", what happens?
-   - Do apps open in new tabs, iframes, or redirect?
-   - How are apps integrated (separate domains, subdomains)?
-   - Is there a unified app authentication system?
-
-5. **User Management**
-   - How are user accounts created by admins?
-   - What user information is stored and displayed?
-   - How are user permissions managed?
-   - Is there a user role system beyond access/no-access?
+- API endpoints for authentication and app data
+- JWT token management and Microsoft OAuth handling
+- Request access API endpoints and data structure
+- User permission checking and app integration flow
 
 #### Infrastructure & Deployment
-6. **Environment Configuration**
-   - What are the development, staging, and production environments?
-   - How are environment variables managed?
-   - What's the deployment strategy (Vercel, AWS, etc.)?
-   - Are there any CDN or asset management requirements?
+- Environment configuration (dev/staging/prod)
+- Deployment strategy and CDN requirements
+- Environment variable management
 
-### 🎯 **Business Logic Questions**
+#### Business Logic
+- Permission levels and access control granularity
+- User personalization and activity tracking
 
-#### Access Control
-7. **Permission Management**
-   - Are there different permission levels (read, write, admin)?
-   - How granular are app permissions (feature-level access)?
-   - Can users have temporary access or expiration dates?
-   - Is there an approval workflow for access requests?
+#### Design & Development
+- Official brand guidelines and design tokens
+- Development timeline and team coordination
 
-8. **Notification System**
-   - What types of notifications will be shown?
-   - How are notifications generated (system, admin, app-based)?
-   - Should notifications be real-time or periodic?
-   - How long should notifications be retained?
+## 📝 Key Notes
 
-#### User Experience
-9. **Personalization**
-   - How dynamic is the home page greeting?
-   - Should there be user preferences or settings?
-   - Are there any user-specific recommendations?
-   - How is user activity tracked?
-
-10. **Content Management**
-    - Who writes and manages app descriptions?
-    - How are app icons and images managed?
-    - Are there content approval workflows?
-    - How is the app catalog updated?
-
-### 📱 **Design System Questions**
-
-#### Brand & Styling
-11. **Official Brand Guidelines**
-    - What are the exact brand colors and hex codes?
-    - What fonts should be used (Google Fonts, custom fonts)?
-    - What are the official spacing and sizing tokens?
-    - Are there any brand-specific icons or imagery?
-
-12. **Responsive Design**
-    - What are the breakpoints for mobile, tablet, desktop?
-    - How should the sidebar behave on mobile devices?
-    - Should there be a mobile app or PWA version?
-    - What's the minimum supported screen size?
-
-13. **Accessibility Requirements**
-    - What WCAG compliance level is required (AA, AAA)?
-    - Are there specific accessibility testing requirements?
-    - Should there be keyboard navigation support?
-    - Are there any screen reader considerations?
-
-### 🔄 **Development Process Questions**
-
-#### Team Coordination
-14. **Design Handoff Process**
-    - How will designs be delivered (Figma, Zeplin, etc.)?
-    - What's the design approval workflow?
-    - How are design changes communicated?
-    - Who are the design stakeholders?
-
-15. **Development Timeline**
-    - What's the target launch date?
-    - Are there any critical milestones or deadlines?
-    - What's the priority order for features?
-    - Are there any dependencies on other teams?
-
-#### Quality Assurance
-16. **Testing Requirements**
-    - What types of testing are required (unit, integration, e2e)?
-    - Are there any specific testing tools or frameworks?
-    - What's the browser and device support matrix?
-    - Are there performance requirements or benchmarks?
-
-### 📊 **Success Metrics & Analytics**
-
-17. **Tracking & Analytics**
-    - What user behavior should be tracked?
-    - Are there any analytics tools to integrate?
-    - What metrics define success for this platform?
-    - How should user feedback be collected?
-
-## 📝 Notes
-
-- **Admin-controlled access** ensures security and proper user management
-- **Phased state management** allows for quick start while maintaining scalability
+- **Admin functionality** handled by backend team via APIs (no admin UI required)
+- **Phased state management** allows quick start while maintaining scalability
 - **Design system approach** ensures consistency and maintainability
 - **Access control strategy** provides clear user experience for different permission levels
-- **Design references** show a clean, modern aesthetic with strong purple branding
-- **AI integration** appears to be a key differentiator in the user experience
+- **Purple branding** with clean, modern aesthetic throughout the platform
 
-This planning document serves as the foundation for implementation decisions and can be updated as requirements evolve. The design references provide valuable context for component specifications and user experience patterns.
+This planning document serves as the foundation for implementation decisions and can be updated as requirements evolve.

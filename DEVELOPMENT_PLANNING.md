@@ -2,27 +2,70 @@
 
 ## 📁 Project Structure
 
+### 🏗️ Co-located Components Architecture
+
+This project follows the **co-located components structure** where components are placed close to where they're used, rather than in a global components folder. This approach provides several benefits:
+
+- **🎯 Better Organization**: Components are grouped with their related pages/features
+- **🔍 Easier Navigation**: Find components quickly by looking in the same directory as the page
+- **📦 Reduced Coupling**: Components are naturally scoped to their specific use cases
+- **🚀 Better Performance**: Easier to implement code splitting and lazy loading
+- **🧹 Cleaner Imports**: Shorter, more intuitive import paths
+
+### 📂 Structure Breakdown
+
+- **`app/(auth)/_components/`** - Authentication-specific components (LoginForm, ForgotPasswordForm, etc.)
+- **`app/(dashboard)/_components/`** - Dashboard-specific components (Sidebar, AppCard, etc.)
+- **`app/(dashboard)/profile/_components/`** - Profile-specific components (ProfileForm, PasswordChangeForm, etc.)
+- **`components/`** - Only truly shared components (LoadingSpinner, ErrorBoundary, etc.)
+- **`components/ui/`** - shadcn/ui components (Button, Input, Card, etc.)
+
 ```
 src/
 ├── app/                          # Next.js App Router
 │   ├── (auth)/                   # Auth route group
+│   │   ├── _components/          # Auth-specific components
+│   │   │   ├── LoginForm.tsx    # Login form component
+│   │   │   ├── ForgotPasswordForm.tsx
+│   │   │   ├── ResetPasswordForm.tsx
+│   │   │   └── MicrosoftLoginButton.tsx
 │   │   ├── login/               # Username/password login
-│   │   ├── ms-login/            # Microsoft OAuth login
-│   │   └── forgot-password/     # Password recovery
+│   │   │   └── page.tsx
+│   │   ├── forgot-password/     # Password recovery
+│   │   │   └── page.tsx
+│   │   └── reset-password/      # Password reset
+│   │       └── page.tsx
 │   ├── (dashboard)/             # Protected dashboard routes
-│   │   ├── page.tsx             # Home page (/)
-│   │   ├── apps/                # Launchpad page (/apps)
-│   │   ├── notifications/       # Notifications page (/notifications)
-│   │   └── profile/             # Profile page (/profile)
+│   │   ├── _components/          # Dashboard-specific components
+│   │   │   ├── Sidebar.tsx      # Dashboard sidebar
+│   │   │   ├── UserProfile.tsx  # User profile dropdown
+│   │   │   ├── AppCard.tsx      # Application card
+│   │   │   ├── AccessRequestModal.tsx
+│   │   │   └── FeatureCard.tsx   # Dashboard feature cards
+│   │   ├── dashboard/           # Main dashboard
+│   │   │   └── page.tsx
+│   │   ├── apps/                # Launchpad page
+│   │   │   └── page.tsx
+│   │   └── profile/             # Profile page
+│   │       ├── _components/     # Profile-specific components
+│   │       │   ├── ProfileForm.tsx
+│   │       │   ├── PasswordChangeForm.tsx
+│   │       │   ├── ProfilePicture.tsx
+│   │       │   └── AccountTabs.tsx
+│   │       └── page.tsx
 │   ├── globals.css              # Global styles
 │   ├── layout.tsx               # Root layout
 │   └── middleware.ts            # Route protection
-├── components/                   # Reusable UI components
+├── components/                   # Shared/Common components only
 │   ├── ui/                      # shadcn/ui components
-│   ├── auth/                    # Authentication components
-│   ├── dashboard/               # Dashboard-specific components
-│   ├── forms/                   # Form components
-│   └── layout/                  # Layout components
+│   ├── common/                  # Truly shared components
+│   │   ├── LoadingSpinner.tsx   # Loading states
+│   │   ├── ErrorBoundary.tsx    # Error handling
+│   │   ├── ConfirmDialog.tsx    # Confirmation dialogs
+│   │   └── Toast.tsx            # Toast notifications
+│   └── layout/                  # Global layout components
+│       ├── Header.tsx           # Global header
+│       └── Footer.tsx           # Global footer
 ├── lib/                         # Utility functions and configs
 │   ├── auth.ts                  # NextAuth.js configuration
 │   ├── api.ts                   # External API client
@@ -53,7 +96,6 @@ src/
 |-------|-----------|---------|------------|
 | `/` | `HomePage` | Welcome dashboard | Authenticated |
 | `/apps` | `LaunchpadPage` | Application grid | Authenticated |
-| `/notifications` | `NotificationsPage` | System notifications | Authenticated |
 | `/profile` | `ProfilePage` | User settings | Authenticated |
 
 ### External API Integration
@@ -68,13 +110,43 @@ src/
 | `POST /auth/reset-password` | POST | Reset password with token | None |
 | `GET /apps` | GET | Get user's accessible apps | Bearer Token |
 | `POST /apps/request-access` | POST | Request app access | Bearer Token |
-| `GET /notifications` | GET | Get user notifications | Bearer Token |
-| `PUT /notifications/[id]` | PUT | Mark notification as read | Bearer Token |
 | `GET /user/profile` | GET | Get user profile | Bearer Token |
 | `PUT /user/profile` | PUT | Update user profile | Bearer Token |
 | `POST /user/change-password` | POST | Change user password | Bearer Token |
 
 ## 🧩 Component Architecture
+
+### 🏗️ Co-located Components Pattern
+
+#### Component Organization Rules
+
+1. **Route-specific components** go in `_components/` folders within their route groups
+2. **Shared components** go in the global `components/` folder
+3. **UI components** (shadcn/ui) go in `components/ui/`
+4. **Layout components** go in `components/layout/`
+
+#### Import Patterns
+
+```typescript
+// ✅ Good: Co-located imports (shorter, clearer)
+import { LoginForm } from './_components/LoginForm'
+import { Sidebar } from '../_components/Sidebar'
+import { ProfileForm } from './_components/ProfileForm'
+
+// ✅ Good: Shared component imports
+import { LoadingSpinner } from '@/components/common/LoadingSpinner'
+import { Button } from '@/components/ui/button'
+
+// ❌ Avoid: Long import paths for route-specific components
+import { LoginForm } from '@/components/auth/LoginForm'
+import { Sidebar } from '@/components/dashboard/Sidebar'
+```
+
+#### Component Naming Conventions
+
+- **Route-specific components**: Use descriptive names (LoginForm, AppCard, ProfileForm)
+- **Shared components**: Use generic names (LoadingSpinner, ErrorBoundary, ConfirmDialog)
+- **UI components**: Follow shadcn/ui naming (Button, Input, Card, Dialog)
 
 ### Layout Components
 
@@ -393,18 +465,6 @@ interface AppContextType {
 }
 ```
 
-#### `NotificationContext`
-```typescript
-interface NotificationContextType {
-  notifications: Notification[];
-  unreadCount: number;
-  isLoading: boolean;
-  fetchNotifications: () => Promise<void>;
-  markAsRead: (id: string) => Promise<void>;
-  markAllAsRead: () => Promise<void>;
-  clearNotification: (id: string) => Promise<void>;
-}
-```
 
 ### Redux Store Structure (Future Phase)
 
@@ -412,7 +472,6 @@ interface NotificationContextType {
 interface RootState {
   auth: AuthState;
   apps: AppsState;
-  notifications: NotificationsState;
   ui: UIState;
 }
 
@@ -431,12 +490,6 @@ interface AppsState {
   error: string | null;
 }
 
-interface NotificationsState {
-  notifications: Notification[];
-  unreadCount: number;
-  isLoading: boolean;
-  error: string | null;
-}
 
 interface UIState {
   sidebarOpen: boolean;
@@ -595,17 +648,6 @@ class ApiClient {
     });
   }
 
-  // Notification endpoints (external backend)
-  async getNotifications(): Promise<Notification[]> {
-    return this.request('/notifications');
-  }
-
-  async markNotificationAsRead(id: string): Promise<void> {
-    return this.request(`/notifications/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ isRead: true }),
-    });
-  }
 
   // User endpoints (external backend)
   async getUserProfile(): Promise<User> {
@@ -866,13 +908,11 @@ CMD ["node", "server.js"]
 - [ ] Integration with external backend for apps data
 
 ### Phase 4: Advanced Features
-- [ ] Notifications page
 - [ ] Profile page with settings
 - [ ] User management features
-- [ ] Real-time notifications (if needed)
 - [ ] Redux Toolkit integration
 - [ ] Performance optimizations
-- [ ] Integration with external backend for notifications and user data
+- [ ] Integration with external backend for user data
 
 ### Phase 5: Testing & Polish
 - [ ] Unit tests for components
@@ -906,8 +946,16 @@ CMD ["node", "server.js"]
 - ✅ **Authentication Flow**: Login/logout UI and session management
 - ✅ **API Integration**: HTTP client setup and error handling
 - ✅ **Performance**: Code splitting, lazy loading, optimization
-- ✅ **Accessibility**: WCAG compliance and keyboard navigation
-- ✅ **Responsive Design**: Mobile-first approach with Tailwind CSS
+- ✅ **Large Screen Design**: Desktop/laptop optimized with Tailwind CSS
+- ✅ **App Launch Integration**: New tab opening with token passing
+
+### Key Implementation Details
+- **App Launch**: Opens in new tab with authentication tokens passed
+- **Screen Support**: Large screen only (no responsive/mobile design required)
+- **Toast Notifications**: Handled by shadcn/ui components
+- **No Admin UI**: Admin functionality handled by backend team via APIs
+- **Limited Apps**: Only 3 applications (no search/filter required)
+- **No User Onboarding**: Limited screens don't require guided tours
 
 ### External Dependencies
 - **Backend API**: Separate service providing all business logic
